@@ -45,5 +45,7 @@ func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	// add profile flag
 	// add region flag
+	rootCmd.PersistentFlags().String("profile", "", "AWS Profile to use")
+	rootCmd.PersistentFlags().String("region", "", "AWS Profile to use")
 
 }

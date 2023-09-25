@@ -22,8 +22,18 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		profile := aws.PromptProfile()
-		region := aws.PromptRegion(profile)
+		profile := cmd.Flag("profile").Value.String()
+		if profile == "" {
+			profile = aws.PromptProfile()
+		} else if !aws.ProfileExists(profile) {
+			fmt.Println("Profile does not exist")
+			return
+		}
+
+		region := cmd.Flag("region").Value.String()
+		if region == "" {
+			region = aws.PromptRegion(profile)
+		}
 
 		aws := aws.Aws{
 			Profile: profile,
