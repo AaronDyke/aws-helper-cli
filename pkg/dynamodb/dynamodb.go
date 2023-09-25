@@ -11,7 +11,7 @@ import (
 )
 
 type ListTable struct {
-	TableName []string `json:"TableName"`
+	TableNames []string `json:"TableNames"`
 }
 
 func ListTables(aws aws.Aws) []string {
@@ -22,7 +22,17 @@ func ListTables(aws aws.Aws) []string {
 	}
 	ListTableResponse := ListTable{}
 	json.Unmarshal(out, &ListTableResponse)
-	return ListTableResponse.TableName
+	return ListTableResponse.TableNames
+}
+
+func TableExists(aws aws.Aws, table string) bool {
+	tables := ListTables(aws)
+	for _, t := range tables {
+		if t == table {
+			return true
+		}
+	}
+	return false
 }
 
 func PromptTables(aws aws.Aws) string {
@@ -41,4 +51,14 @@ func PromptTables(aws aws.Aws) string {
 		log.Fatal(err)
 	}
 	return table
+}
+
+func PutItem(aws aws.Aws, table string, pathToItem string) {
+	// fmt.Println("aws ", "dynamodb ", "put-item ", "--table-name ", table, " --item ", fmt.Sprintf("file://%s", pathToItem), " --profile ", aws.Profile, " --region ", aws.Region)
+	cmd := exec.Command("aws", "dynamodb", "put-item", "--table-name", table, "--item", fmt.Sprintf("file://%s", pathToItem), "--profile", aws.Profile, "--region", aws.Region)
+	out, err := cmd.Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(out))
 }
