@@ -48,7 +48,8 @@ to quickly create a Cobra application.`,
 			return
 		}
 
-		dynamodb.PutItem(aws, table, "test.json")
+		item := cmd.Flag("item").Value.String()
+		dynamodb.PutItem(aws, table, item)
 	},
 }
 
