@@ -23,6 +23,12 @@ type AwsRegions struct {
 	Regions []AwsRegion `json:"Regions"`
 }
 
+func IsCliInstalled() bool {
+	cmd := exec.Command("aws", "--version")
+	err := cmd.Run()
+	return err == nil
+}
+
 func ListProfiles() []string {
 	cmd := exec.Command("aws", "configure", "list-profiles", "--output", "json")
 	out, err := cmd.Output()
