@@ -68,16 +68,29 @@ func TableExists(aws aws.Aws, table string) bool {
 	return false
 }
 
-func PromptTables(aws aws.Aws) string {
+func PromptTables(aws aws.Aws, label string, excludeTables []string) string {
 	tables := ListTables(aws)
+	if len(tables) == 0 {
+		fmt.Println("No tables found")
+		return ""
+	}
+	// remove all tables in excludeTables
+	for _, excludeTable := range excludeTables {
+		for i, table := range tables {
+			if table == excludeTable {
+				tables = append(tables[:i], tables[i+1:]...)
+			}
+		}
+	}
+
 	if len(tables) == 0 {
 		fmt.Println("No tables found")
 		return ""
 	}
 
 	tablePrompt := promptui.Select{
-		Label: "Select DynamoDB Table",
-		Items: ListTables(aws),
+		Label: label,
+		Items: tables,
 	}
 	_, table, err := tablePrompt.Run()
 	if err != nil {
@@ -158,4 +171,43 @@ func TableSortKey(aws aws.Aws, table string) string {
 		}
 	}
 	return ""
+}
+
+func PromptKey(keyName string) string {
+	prompt := promptui.Prompt{
+		Label: fmt.Sprintf("Query where %s = ", keyName),
+	}
+	key, err := prompt.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return key
+}
+
+func PromptPartitionKey(aws aws.Aws, table string) string {
+	partitionKeyName := TablePartitionKey(aws, table)
+	if partitionKeyName == "" {
+		fmt.Println("No partition key found")
+		return ""
+	}
+
+	return PromptKey(partitionKeyName)
+}
+
+func PromptSortKey(aws aws.Aws, table string) string {
+	sortKeyName := TableSortKey(aws, table)
+	if sortKeyName == "" {
+		fmt.Println("No sort key found")
+		return ""
+	}
+
+	return PromptKey(sortKeyName)
+}
+
+func CopyItems(aws aws.Aws, fromTable string, toTable string, partitionKey string, sortKey string) {
+	fmt.Println("Copy Items ", " --profile ", aws.Profile, " --region ", aws.Region, " --from-table ", fromTable, " --to-table ", toTable, " --partition-key ", partitionKey, " --sort-key ", sortKey)
+}
+
+func CopyItem(aws aws.Aws, fromTable string, toTable string, partitionKey string) {
+	fmt.Println("Copy Item ", " --profile ", aws.Profile, " --region ", aws.Region, " --from-table ", fromTable, " --to-table ", toTable, " --partition-key ", partitionKey)
 }

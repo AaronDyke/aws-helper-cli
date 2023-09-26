@@ -42,7 +42,7 @@ to quickly create a Cobra application.`,
 
 		table := cmd.Flag("table").Value.String()
 		if table == "" {
-			table = dynamodb.PromptTables(aws)
+			table = dynamodb.PromptTables(aws, "Select DynamoDB Table", []string{})
 		} else if !dynamodb.TableExists(aws, table) {
 			fmt.Println("Table does not exist")
 			return
