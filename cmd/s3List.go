@@ -31,6 +31,14 @@ to quickly create a Cobra application.`,
 		}
 
 		fmt.Println(s3.ListBuckets(profile))
+
+		if cmd.Flag("quiet").Value.String() == "true" {
+			return
+		} else {
+			fmt.Println("To run this exact command again, run the following:")
+			finishedCmd := fmt.Sprintf("aws-helper-cli s3 list --profile %s", profile)
+			fmt.Println(finishedCmd)
+		}
 	},
 }
 

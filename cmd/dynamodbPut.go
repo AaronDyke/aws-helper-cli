@@ -50,6 +50,14 @@ to quickly create a Cobra application.`,
 
 		item := cmd.Flag("item").Value.String()
 		dynamodb.PutItem(aws, table, item)
+
+		if cmd.Flag("quiet").Value.String() == "true" {
+			return
+		} else {
+			fmt.Println("To run this exact command again, run the following:")
+			finishedCmd := fmt.Sprintf("aws-helper-cli dynamodb put --profile %s --region %s --table %s --item %s", profile, region, table, item)
+			fmt.Println(finishedCmd)
+		}
 	},
 }
 

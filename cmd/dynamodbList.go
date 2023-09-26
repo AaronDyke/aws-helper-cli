@@ -46,6 +46,14 @@ to quickly create a Cobra application.`,
 			return
 		}
 		fmt.Println(dynamodb.ListTables(aws))
+
+		if cmd.Flag("quiet").Value.String() == "true" {
+			return
+		} else {
+			fmt.Println("To run this exact command again, run the following:")
+			finishedCmd := fmt.Sprintf("aws-helper-cli dynamodb list --profile %s --region %s", profile, region)
+			fmt.Println(finishedCmd)
+		}
 	},
 }
 
