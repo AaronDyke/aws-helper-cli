@@ -8,6 +8,7 @@ import (
 
 	"github.com/AaronDyke/aws-helper-cli/pkg/aws"
 	"github.com/AaronDyke/aws-helper-cli/pkg/dynamodb"
+	"github.com/AaronDyke/aws-helper-cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -72,17 +73,14 @@ to quickly create a Cobra application.`,
 			dynamodb.CopyItems(aws, fromTable, toTable, partitionKey, sortKeyBeginsWith)
 		}
 
-		if cmd.Flag("quiet").Value.String() == "true" {
-			return
-		} else {
-			fmt.Println("\nTo run this exact command again, use the following:")
-			finishedCmd := fmt.Sprintf("aws-helper-cli dynamodb copy --profile %s --region %s --from %s --to %s --partition-key %s", profile, region, fromTable, toTable, partitionKey)
+		if cmd.Flag("quiet").Value.String() != "true" {
+			flags := map[string]string{"profile": profile, "region": region, "from": fromTable, "to": toTable, "partition-key": partitionKey}
 			if sortKey != "" {
-				finishedCmd = finishedCmd + fmt.Sprintf(" --sort-key %s", sortKey)
+				flags["sort-key"] = sortKey
 			} else if sortKeyBeginsWith != "" {
-				finishedCmd = finishedCmd + fmt.Sprintf(" --sort-key-begins-with %s", sortKeyBeginsWith)
+				flags["sort-key-begins-with"] = sortKeyBeginsWith
 			}
-			fmt.Println(finishedCmd)
+			utils.PrintRunCommandAgain("dynamodb copy", flags, args)
 		}
 	},
 }

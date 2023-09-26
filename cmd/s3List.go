@@ -8,6 +8,7 @@ import (
 
 	"github.com/AaronDyke/aws-helper-cli/pkg/aws"
 	"github.com/AaronDyke/aws-helper-cli/pkg/s3"
+	"github.com/AaronDyke/aws-helper-cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -32,12 +33,8 @@ to quickly create a Cobra application.`,
 
 		fmt.Println(s3.ListBuckets(profile))
 
-		if cmd.Flag("quiet").Value.String() == "true" {
-			return
-		} else {
-			fmt.Println("To run this exact command again, run the following:")
-			finishedCmd := fmt.Sprintf("aws-helper-cli s3 list --profile %s", profile)
-			fmt.Println(finishedCmd)
+		if cmd.Flag("quiet").Value.String() != "true" {
+			utils.PrintRunCommandAgain("s3 list", map[string]string{"profile": profile}, args)
 		}
 	},
 }
