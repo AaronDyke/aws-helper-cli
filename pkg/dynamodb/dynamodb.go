@@ -204,10 +204,10 @@ func PromptSortKey(aws aws.Aws, table string) string {
 	return PromptKey(sortKeyName)
 }
 
-func CopyItems(aws aws.Aws, fromTable string, toTable string, partitionKey string, sortKey string) {
-	fmt.Println("Copy Items ", " --profile ", aws.Profile, " --region ", aws.Region, " --from-table ", fromTable, " --to-table ", toTable, " --partition-key ", partitionKey, " --sort-key ", sortKey)
+func CopyItems(aws aws.Aws, fromTable string, toTable string, partitionKey string, sortKeyBeginsWith string) {
+	fmt.Println("Copy Items ", " --profile ", aws.Profile, " --region ", aws.Region, " --from-table ", fromTable, " --to-table ", toTable, " --partition-key ", partitionKey, " --sort-key-begins-with ", sortKeyBeginsWith)
 }
 
-func CopyItem(aws aws.Aws, fromTable string, toTable string, partitionKey string) {
-	fmt.Println("Copy Item ", " --profile ", aws.Profile, " --region ", aws.Region, " --from-table ", fromTable, " --to-table ", toTable, " --partition-key ", partitionKey)
+func CopyItem(aws aws.Aws, fromTable string, toTable string, partitionKey string, sortKey string) {
+	fmt.Println("Copy Item ", " --profile ", aws.Profile, " --region ", aws.Region, " --from-table ", fromTable, " --to-table ", toTable, " --partition-key ", partitionKey, " --sort-key ", sortKey)
 }

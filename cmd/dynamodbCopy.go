@@ -56,27 +56,34 @@ to quickly create a Cobra application.`,
 		}
 
 		partitionKey := cmd.Flag("partition-key").Value.String()
-		if partitionKey == "" {
+		if partitionKey == "DEFAULT" {
 			partitionKey = dynamodb.PromptPartitionKey(aws, fromTable)
 		}
 
 		sortKey := cmd.Flag("sort-key").Value.String()
-		if sortKey == "" {
-			sortKey = dynamodb.PromptSortKey(aws, fromTable)
-		}
+		sortKeyBeginsWith := cmd.Flag("sort-key-begins-with").Value.String()
 
 		if partitionKey == "" {
 			fmt.Println("Please specify a partition key")
 			return
-		} else if sortKey == "" {
-			dynamodb.CopyItems(aws, fromTable, toTable, partitionKey, sortKey)
+		} else if sortKey != "" {
+			dynamodb.CopyItem(aws, fromTable, toTable, partitionKey, sortKey)
 		} else {
-			dynamodb.CopyItem(aws, fromTable, toTable, partitionKey)
+			dynamodb.CopyItems(aws, fromTable, toTable, partitionKey, sortKeyBeginsWith)
 		}
 
-		fmt.Println("To run this exact command again, use the following:")
-		finishedCmd := fmt.Sprint("aws-helper-cli dynamodb copy --profile", profile, "--region", region, "--from", fromTable, "--to", toTable, "--partition-key", partitionKey, "--sort-key", sortKey)
-		fmt.Println(finishedCmd)
+		if cmd.Flag("quiet").Value.String() == "true" {
+			return
+		} else {
+			fmt.Println("\nTo run this exact command again, use the following:")
+			finishedCmd := fmt.Sprintf("aws-helper-cli dynamodb copy --profile %s --region %s --from %s --to %s --partition-key %s", profile, region, fromTable, toTable, partitionKey)
+			if sortKey != "" {
+				finishedCmd = finishedCmd + fmt.Sprintf(" --sort-key %s", sortKey)
+			} else if sortKeyBeginsWith != "" {
+				finishedCmd = finishedCmd + fmt.Sprintf(" --sort-key-begins-with %s", sortKeyBeginsWith)
+			}
+			fmt.Println(finishedCmd)
+		}
 	},
 }
 
@@ -86,6 +93,8 @@ func init() {
 	dynamodbCopyCmd.Flags().String("to", "", "DynamoDB table name to copy to")
 	dynamodbCopyCmd.Flags().String("partition-key", "", "Partition key to use for copy")
 	dynamodbCopyCmd.Flags().String("sort-key", "", "Sort key to use for copy")
+	dynamodbCopyCmd.Flags().String("sort-key-begins-with", "", "Sort key begins with value to use for copy")
+	dynamodbCopyCmd.MarkFlagsMutuallyExclusive("sort-key", "sort-key-begins-with")
 
 	// Here you will define your flags and configuration settings.
 
