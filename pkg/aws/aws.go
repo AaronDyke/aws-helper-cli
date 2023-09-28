@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/AaronDyke/aws-helper-cli/pkg/utils"
+	"github.com/aws/aws-sdk-go-v2/config"
 )
 
 type Aws struct {
@@ -100,4 +102,14 @@ func PromptRegion(profile string) string {
 
 	regionChoice := utils.PromptItems("Select Region", ListRegions(profile))
 	return regionChoice
+}
+
+func ConfigSDK(aws Aws) config.Config {
+	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(aws.Profile), config.WithRegion(aws.Region))
+	if err != nil {
+		log.Fatal(err)
+		panic(err)
+	}
+
+	return cfg
 }
