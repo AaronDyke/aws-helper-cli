@@ -7,7 +7,7 @@ import (
 	"os/exec"
 
 	"github.com/AaronDyke/aws-helper-cli/pkg/aws"
-	"github.com/manifoldco/promptui"
+	"github.com/AaronDyke/aws-helper-cli/pkg/utils"
 )
 
 type ListTable struct {
@@ -88,15 +88,8 @@ func PromptTables(aws aws.Aws, label string, excludeTables []string) string {
 		return ""
 	}
 
-	tablePrompt := promptui.Select{
-		Label: label,
-		Items: tables,
-	}
-	_, table, err := tablePrompt.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return table
+	tableChoice := utils.PromptItems(label, tables)
+	return tableChoice
 }
 
 func PutItem(aws aws.Aws, table string, pathToItem string) {
@@ -174,13 +167,7 @@ func TableSortKey(aws aws.Aws, table string) string {
 }
 
 func PromptKey(keyName string) string {
-	prompt := promptui.Prompt{
-		Label: fmt.Sprintf("Query where %s = ", keyName),
-	}
-	key, err := prompt.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
+	key := utils.PromptText(fmt.Sprintf("Query where %s = ", keyName))
 	return key
 }
 

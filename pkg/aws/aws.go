@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/manifoldco/promptui"
+	"github.com/AaronDyke/aws-helper-cli/pkg/utils"
 )
 
 type Aws struct {
@@ -51,16 +51,8 @@ func ProfileExists(profile string) bool {
 }
 
 func PromptProfile() string {
-	profilePrompt := promptui.Select{
-		Label: "Select Profile",
-		Items: ListProfiles(),
-	}
-	_, profile, err := profilePrompt.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		panic(err)
-	}
-	return profile
+	profileChoice := utils.PromptItems("Select Profile", ListProfiles())
+	return profileChoice
 }
 
 func ListRegions(profile string) []string {
@@ -102,28 +94,10 @@ func RegionExists(profile string, region string) bool {
 }
 
 func PromptRegion(profile string) string {
-	defaultPrompt := promptui.Prompt{
-		Label:   "The default region is " + DefaultRegion(profile) + ". Do you want to use this region? (y/n)",
-		Default: "n",
-	}
-	result, err := defaultPrompt.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		panic(err)
-	}
-	result = strings.ToLower(result)
-	if result == "y" || result == "yes" {
+	if utils.PromptYesNo(fmt.Sprintf("Use default region (%s)?", DefaultRegion(profile))) {
 		return DefaultRegion(profile)
 	}
 
-	regionPrompt := promptui.Select{
-		Label: "Select Region",
-		Items: ListRegions(profile),
-	}
-	_, region, err := regionPrompt.Run()
-	if err != nil {
-		fmt.Printf("Prompt failed %v\n", err)
-		panic(err)
-	}
-	return region
+	regionChoice := utils.PromptItems("Select Region", ListRegions(profile))
+	return regionChoice
 }
