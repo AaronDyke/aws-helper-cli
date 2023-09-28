@@ -31,7 +31,9 @@ to quickly create a Cobra application.`,
 			return
 		}
 
+		// TODO: Test performance of both methods
 		fmt.Println(s3.ListBuckets(profile))
+		// fmt.Println(s3.ListBucketsSDK(profile))
 
 		if cmd.Flag("quiet").Value.String() != "true" {
 			utils.PrintRunCommandAgain("s3 list", map[string]string{"profile": profile}, args)
