@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
 type ListTable struct {
@@ -235,5 +236,27 @@ func CopyItems(aws aws.Aws, fromTable string, toTable string, partitionKey strin
 }
 
 func CopyItem(aws aws.Aws, fromTable string, toTable string, partitionKey string, sortKey string) {
-	fmt.Println("Copy Item ", " --profile ", aws.Profile, " --region ", aws.Region, " --from-table ", fromTable, " --to-table ", toTable, " --partition-key ", partitionKey, " --sort-key ", sortKey)
+	dynamodbClient := createClient(aws)
+	pk, sk := TableKeys(aws, fromTable)
+	getItem, err := dynamodbClient.GetItem(context.TODO(), &dynamodb.GetItemInput{
+		TableName: &fromTable,
+		Key: map[string]types.AttributeValue{
+			pk: &types.AttributeValueMemberS{Value: partitionKey},
+			sk: &types.AttributeValueMemberS{Value: sortKey},
+		},
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = dynamodbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
+		TableName: &toTable,
+		Item:      getItem.Item,
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
