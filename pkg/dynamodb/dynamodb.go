@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 
 	"github.com/AaronDyke/aws-helper-cli/pkg/aws"
 	"github.com/AaronDyke/aws-helper-cli/pkg/utils"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
@@ -50,12 +52,17 @@ type ProvisionedThroughput struct {
 	WriteCapacityUnits     int   `json:"WriteCapacityUnits"`
 }
 
-func ListTables(aws aws.Aws) []string {
+func createClient(aws aws.Aws) *dynamodb.Client {
 	sdkConfig, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(aws.Profile), config.WithRegion(aws.Region))
 	if err != nil {
 		panic(err)
 	}
 	dynamoClient := dynamodb.NewFromConfig(sdkConfig)
+	return dynamoClient
+}
+
+func ListTables(aws aws.Aws) []string {
+	dynamoClient := createClient(aws)
 	result, err := dynamoClient.ListTables(context.TODO(), &dynamodb.ListTablesInput{})
 	if err != nil {
 		panic(err)
@@ -100,13 +107,38 @@ func PromptTables(aws aws.Aws, label string, excludeTables []string) string {
 }
 
 func PutItem(aws aws.Aws, table string, pathToItem string) {
-	// fmt.Println("aws ", "dynamodb ", "put-item ", "--table-name ", table, " --item ", fmt.Sprintf("file://%s", pathToItem), " --profile ", aws.Profile, " --region ", aws.Region)
-	cmd := exec.Command("aws", "dynamodb", "put-item", "--table-name", table, "--item", fmt.Sprintf("file://%s", pathToItem), "--profile", aws.Profile, "--region", aws.Region)
-	out, err := cmd.Output()
+	dynamodbClient := createClient(aws)
+
+	file, err := os.ReadFile(pathToItem)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(string(out))
+	var item map[string]interface{}
+	json.Unmarshal(file, &item)
+
+	pk, sk := TableKeys(aws, table)
+	if item[pk] == nil {
+		fmt.Println("Partition key not found in item")
+		return
+	}
+	if item[sk] == nil {
+		fmt.Println("Sort key not found in item")
+		return
+	}
+
+	marshaledItem, err := attributevalue.MarshalMap(item)
+	if err != nil {
+		log.Fatalf("Got error marshalling new movie item: %s", err)
+	}
+
+	_, err = dynamodbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
+		TableName: &table,
+		Item:      marshaledItem,
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func DescribeTable(aws aws.Aws, table string) DescribeTableResponse {
