@@ -1,6 +1,7 @@
 package dynamodb
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -8,6 +9,8 @@ import (
 
 	"github.com/AaronDyke/aws-helper-cli/pkg/aws"
 	"github.com/AaronDyke/aws-helper-cli/pkg/utils"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
 type ListTable struct {
@@ -48,14 +51,18 @@ type ProvisionedThroughput struct {
 }
 
 func ListTables(aws aws.Aws) []string {
-	cmd := exec.Command("aws", "dynamodb", "list-tables", "--profile", aws.Profile, "--region", aws.Region)
-	out, err := cmd.Output()
+	sdkConfig, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(aws.Profile), config.WithRegion(aws.Region))
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-	ListTableResponse := ListTable{}
-	json.Unmarshal(out, &ListTableResponse)
-	return ListTableResponse.TableNames
+	dynamoClient := dynamodb.NewFromConfig(sdkConfig)
+	result, err := dynamoClient.ListTables(context.TODO(), &dynamodb.ListTablesInput{})
+	if err != nil {
+		panic(err)
+	}
+	tables := make([]string, 0, len(result.TableNames))
+	tables = append(tables, result.TableNames...)
+	return tables
 }
 
 func TableExists(aws aws.Aws, table string) bool {
