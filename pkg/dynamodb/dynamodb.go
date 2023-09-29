@@ -232,13 +232,50 @@ func PromptSortKey(aws aws.Aws, table string) string {
 }
 
 func CopyItems(aws aws.Aws, fromTable string, toTable string, partitionKey string, sortKeyBeginsWith string) {
-	fmt.Println("Copy Items ", " --profile ", aws.Profile, " --region ", aws.Region, " --from-table ", fromTable, " --to-table ", toTable, " --partition-key ", partitionKey, " --sort-key-begins-with ", sortKeyBeginsWith)
+	dynamodbClient := createClient(aws)
+	pk, sk := TableKeys(aws, fromTable)
+	keyConditionExpression := "#pk = :partitionKey"
+	expressionAttributeNames := map[string]string{
+		"#pk": pk,
+	}
+	expressionAttributeValues := map[string]types.AttributeValue{
+		":partitionKey": &types.AttributeValueMemberS{Value: partitionKey},
+	}
+
+	if sortKeyBeginsWith != "" {
+		keyConditionExpression = "#pk = :partitionKey and begins_with(#sk, :sortKey)"
+		expressionAttributeNames["#sk"] = sk
+		expressionAttributeValues[":sortKey"] = &types.AttributeValueMemberS{Value: sortKeyBeginsWith}
+	}
+
+	queryResponse, err := dynamodbClient.Query(context.TODO(), &dynamodb.QueryInput{
+		TableName:                 &fromTable,
+		KeyConditionExpression:    &keyConditionExpression,
+		ExpressionAttributeNames:  expressionAttributeNames,
+		ExpressionAttributeValues: expressionAttributeValues,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// TODO: update to be concurrent/batched
+	for _, item := range queryResponse.Items {
+		_, err = dynamodbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
+			TableName: &toTable,
+			Item:      item,
+		})
+
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 }
 
 func CopyItem(aws aws.Aws, fromTable string, toTable string, partitionKey string, sortKey string) {
 	dynamodbClient := createClient(aws)
 	pk, sk := TableKeys(aws, fromTable)
-	getItem, err := dynamodbClient.GetItem(context.TODO(), &dynamodb.GetItemInput{
+	getResponse, err := dynamodbClient.GetItem(context.TODO(), &dynamodb.GetItemInput{
 		TableName: &fromTable,
 		Key: map[string]types.AttributeValue{
 			pk: &types.AttributeValueMemberS{Value: partitionKey},
@@ -252,7 +289,7 @@ func CopyItem(aws aws.Aws, fromTable string, toTable string, partitionKey string
 
 	_, err = dynamodbClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
 		TableName: &toTable,
-		Item:      getItem.Item,
+		Item:      getResponse.Item,
 	})
 
 	if err != nil {
