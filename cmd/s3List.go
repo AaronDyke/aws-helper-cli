@@ -31,7 +31,10 @@ to quickly create a Cobra application.`,
 			return
 		}
 
-		fmt.Println(s3.ListBuckets(profile))
+		buckets := s3.ListBuckets(profile)
+		for _, bucket := range buckets {
+			fmt.Println(bucket)
+		}
 
 		if cmd.Flag("quiet").Value.String() != "true" {
 			utils.PrintRunCommandAgain("s3 list", map[string]string{"profile": profile}, args)

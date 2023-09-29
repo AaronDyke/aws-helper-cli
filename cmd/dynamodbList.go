@@ -46,7 +46,10 @@ to quickly create a Cobra application.`,
 			fmt.Println("No DynamoDB tables found")
 			return
 		}
-		fmt.Println(dynamodb.ListTables(aws))
+
+		for _, table := range tables {
+			fmt.Println(table)
+		}
 
 		if cmd.Flag("quiet").Value.String() != "true" {
 			utils.PrintRunCommandAgain("dynamodb list", map[string]string{"profile": profile, "region": region}, args)
