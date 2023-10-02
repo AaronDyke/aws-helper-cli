@@ -13,16 +13,8 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "aws-helper-cli",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Short: "CLI to interact with AWS",
+	Long:  `A CLI to interact with AWS that allows for interactions beyond the AWS CLI.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		cmd.Annotations = make(map[string]string)
 	},

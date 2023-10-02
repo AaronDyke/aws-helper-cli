@@ -15,13 +15,8 @@ import (
 // dynamodbCopyCmd represents the dynamodbCopy command
 var dynamodbCopyCmd = &cobra.Command{
 	Use:   "copy",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Copy DynamoDB items from table to table",
+	Long:  `Copy DynamoDB items based on the key structure specified in the flags.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		profile := cmd.Flag("profile").Value.String()
 		if profile == "" {
