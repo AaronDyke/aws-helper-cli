@@ -36,9 +36,7 @@ to quickly create a Cobra application.`,
 			fmt.Println(bucket)
 		}
 
-		if cmd.Flag("quiet").Value.String() != "true" {
-			utils.PrintRunCommandAgain("s3 list", map[string]string{"profile": profile}, args)
-		}
+		cmd.Annotations["commandString"] = utils.CommandString("s3 list", map[string]string{"profile": profile}, args)
 	},
 }
 

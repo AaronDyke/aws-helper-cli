@@ -4,6 +4,7 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -22,6 +23,15 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		cmd.Annotations = make(map[string]string)
+	},
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		if cmd.Flag("quiet").Value.String() != "true" {
+			fmt.Println("To run this exact command again, use the following:")
+			fmt.Println(cmd.Annotations["commandString"])
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

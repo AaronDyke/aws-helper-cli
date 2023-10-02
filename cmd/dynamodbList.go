@@ -51,9 +51,7 @@ to quickly create a Cobra application.`,
 			fmt.Println(table)
 		}
 
-		if cmd.Flag("quiet").Value.String() != "true" {
-			utils.PrintRunCommandAgain("dynamodb list", map[string]string{"profile": profile, "region": region}, args)
-		}
+		cmd.Annotations["commandString"] = utils.CommandString("dynamodb list", map[string]string{"profile": profile, "region": region}, args)
 	},
 }
 

@@ -73,15 +73,13 @@ to quickly create a Cobra application.`,
 			dynamodb.CopyItems(aws, fromTable, toTable, partitionKey, sortKeyBeginsWith)
 		}
 
-		if cmd.Flag("quiet").Value.String() != "true" {
-			flags := map[string]string{"profile": profile, "region": region, "from": fromTable, "to": toTable, "partition-key": partitionKey}
-			if sortKey != "" {
-				flags["sort-key"] = sortKey
-			} else if sortKeyBeginsWith != "" {
-				flags["sort-key-begins-with"] = sortKeyBeginsWith
-			}
-			utils.PrintRunCommandAgain("dynamodb copy", flags, args)
+		flags := map[string]string{"profile": profile, "region": region, "from": fromTable, "to": toTable, "partition-key": partitionKey}
+		if sortKey != "" {
+			flags["sort-key"] = sortKey
+		} else if sortKeyBeginsWith != "" {
+			flags["sort-key-begins-with"] = sortKeyBeginsWith
 		}
+		cmd.Annotations["commandString"] = utils.CommandString("dynamodb copy", flags, args)
 	},
 }
 

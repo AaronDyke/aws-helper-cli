@@ -52,9 +52,7 @@ to quickly create a Cobra application.`,
 		item := cmd.Flag("item").Value.String()
 		dynamodb.PutItem(aws, table, item)
 
-		if cmd.Flag("quiet").Value.String() != "true" {
-			utils.PrintRunCommandAgain("dynamodb put", map[string]string{"profile": profile, "region": region, "table": table, "item": item}, args)
-		}
+		cmd.Annotations["commandString"] = utils.CommandString("dynamodb put", map[string]string{"profile": profile, "region": region, "table": table, "item": item}, args)
 	},
 }
 

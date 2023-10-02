@@ -7,8 +7,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-func PrintRunCommandAgain(cmd string, flags map[string]string, args []string) {
-	fmt.Println("To run this exact command again, use the following:")
+func CommandString(cmd string, flags map[string]string, args []string) string {
 	finishedCmd := fmt.Sprintf("aws-helper-cli %s", cmd)
 	for key, value := range flags {
 		finishedCmd = finishedCmd + fmt.Sprintf(" --%s %s", key, value)
@@ -16,7 +15,7 @@ func PrintRunCommandAgain(cmd string, flags map[string]string, args []string) {
 	for _, arg := range args {
 		finishedCmd = finishedCmd + fmt.Sprintf(" %s", arg)
 	}
-	fmt.Println(finishedCmd)
+	return finishedCmd
 }
 
 func PromptText(label string) string {
